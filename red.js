@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+var os = require('os');
 var http = require('http');
 var https = require('https');
 var util = require("util");
@@ -56,7 +57,18 @@ app.use(settings.httpRoot,red);
 RED.start();
 
 server.listen(settings.uiPort,function() {
-        util.log('[red] Server now running at http'+(settings.https?'s':'')+'://127.0.0.1:'+settings.uiPort+settings.httpRoot);
+		//Get our IP Address
+		var interfaces = os.networkInterfaces();
+		var addresses = [];
+		for (k in interfaces) {
+			for (k2 in interfaces[k]) {
+				var address = interfaces[k][k2];
+				if (address.family == 'IPv4' && !address.internal) {
+					addresses.push(address.address)
+				}
+			}
+		}
+		util.log('[red] Server now running at http'+(settings.https?'s':'')+'://127.0.0.1:'+settings.uiPort+settings.httpRoot + ' (or Local Network IP Addresses: ' + addresses + ')\n\nCTRL + C to shutdown');
 });
 
 process.on('uncaughtException',function(err) {
@@ -69,5 +81,3 @@ process.on('uncaughtException',function(err) {
         }
         process.exit(1);
 });
-
-
